@@ -84,7 +84,8 @@ def unpackTree(file):
     read = WindowsReader(file).read
     return tuple([read(lets_per_char) for i in range(Li)] for Li in L) # (3)
 
-def Haffman(leafs):
+def Haffman(AB):
+    leafs = tuple(Leaf(letter, p) for letter, p in AB.items())
     # leafs = sorted(leafs, key = lambda leaf: leaf.p, reverse = True) старый и неоптимальный вариант для дальнейшей вставки
     leafs = SortedList(leafs)
     print(leafs)
@@ -114,7 +115,7 @@ def ShennonFano(AB):
     recurs("", 0, len(P) - 1)
     return codes
 
-def check_codes(AB, size, codes): # чисто теория. Нет фактической сборки данных в кодированную цепочку битов
+def check_codes(AB, size, codes, n = 1): # чисто теория. Нет фактической сборки данных в кодированную цепочку битов
     # size = sum(AB.values())
     bits = 0
     L_avg = 0
@@ -125,6 +126,8 @@ def check_codes(AB, size, codes): # чисто теория. Нет фактич
         bits += count * L
         L_avg += p * L
         H += Mu(p)
+    L_avg /= n
+    H /= n
     print("Размер кодированных данных неравномерным кодом (теоретический):", (bits + 7) // 8, "b.")
     print(f"Lср.: {L_avg:.5f}")
     print(f"H: {H:.5f}")
@@ -140,6 +143,14 @@ def coder(data, codes): # а вот и кодирование ради H1, H2, H
         h = Shannon(P) / group_n
         print(f"H{group_n} = {h:.5f}")
 
+def check_tree_packer(L_mat):
+    packed = packTree(L_mat)
+    unpacked = unpackTree(BytesIO(packed))
+    print("Размер дерева Хаффмана:", len(packed), "b.")
+    print(L_mat)
+    print(unpacked) # дабы убедиться, что L_mat из байтового потока декодируется назад без помех
+    print("Сошлись?", "Да" if L_mat == unpacked else ":///")
+
 def reader(name):
     print()
     print("~" * 33, name, "~" * 33)
@@ -147,19 +158,13 @@ def reader(name):
     size = os.stat(name).st_size
 
     AB = H1(data) # алфавит с частотами
-    leafs = tuple(Leaf(letter, p) for letter, p in AB.items())
-    L_mat = Haffman(leafs)
+    L_mat = Haffman(AB)
 
-    packed = packTree(L_mat)
-    unpacked = unpackTree(BytesIO(packed))
-    print(L_mat)
-    print(unpacked) # дабы убедиться, что L_mat из байтового потока декодируется назад без помех
-    print("Сошлись?", "Да" if L_mat == unpacked else ":///")
+    check_tree_packer(L_mat)
 
     optimal = ceil(log2(len(AB)))
     print("Размер файла до сжатия (байтами, т.е. 8-битный равномерный код):", size, "b.")
     print(f"Размер файла до сжатия ({optimal}-битный равномерный код):", (size * optimal + 7) // 8, "b.")
-    print("Размер дерева Хаффмана:", len(packed), "b.")
 
     codes = HaffmanCodegen(L_mat)
     check_codes(AB, size, codes)
