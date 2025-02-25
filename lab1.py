@@ -42,7 +42,7 @@ def art_generator(src_name, size, name):
             return " "
     with open(src_name, "r", encoding = "windows-1251") as src:
         read = src.read
-        with open(name, "w", encoding = "utf-8") as file:
+        with open(name, "w", encoding = "windows-1251") as file:
             write = file.write
             for i in range(size): write(getter())
 
@@ -73,8 +73,8 @@ def H(P): # энтропия Шеннона
 def H_X(len_B): # энтропия Хартли (ещё записывают, как Hmax)
     return log2(len_B)
 
-print("Hteor1:", H((1,) * len_B), "=", Mu(1 / len_B) * len_B, "=", H_X(len_B)) # сразу 3 способа. 2 и 3 способ будут быстрее на порядок, чем первый
-print("Hteor2:", H(P))
+# print("Hteor1:", H((1,) * len_B), "=", Mu(1 / len_B) * len_B, "=", H_X(len_B)) # сразу 3 способа. 2 и 3 способ будут быстрее на порядок, чем первый
+# print("Hteor2:", H(P))
 
 def Craft(L, len_B): # неравенство Крафта, чтобы было
     S = sum(len_B ** (-len) for len in L)
@@ -103,7 +103,7 @@ def H2_plus(data, group_n):
 def reader(name):
     print()
     print("~" * 33, name, "~" * 33)
-    with open(name, "r", encoding = "utf-8") as file: data = file.read()
+    with open(name, "r", encoding = "windows-1251") as file: data = file.read()
 
     for group_n in (1, 2, 3, 4, 5, 6, 7, 8):
         A = H2_plus(data, group_n)
@@ -120,6 +120,7 @@ def reader(name):
         print("H%s:" % group_n, h , "µ = %.3f%%" % (mu * 100), "r = %.3f%%" % (rho * 100))
         print()
 
-reader("lab1_file1.txt")
-reader("lab1_file2.txt")
-reader("lab1_file3.txt")
+if __name__ == "__main__":
+    reader("lab1_file1.txt")
+    reader("lab1_file2.txt")
+    reader("lab1_file3.txt")
