@@ -151,6 +151,11 @@ def check_tree_packer(L_mat):
     print(unpacked) # дабы убедиться, что L_mat из байтового потока декодируется назад без помех
     print("Сошлись?", "Да" if L_mat == unpacked else ":///")
 
+def encode_to_file(data, codes, name):
+    with open(name, "w") as file:
+        write = file.write
+        for letter in data: write(codes[letter])
+
 def reader(name):
     print()
     print("~" * 33, name, "~" * 33)
@@ -169,6 +174,7 @@ def reader(name):
     codes = HaffmanCodegen(L_mat)
     check_codes(AB, size, codes)
     coder(data, codes)
+    encode_to_file(data, codes, name.replace("lab1", "lab2"))
 
     codes = ShennonFano(AB)
     check_codes(AB, size, codes)
